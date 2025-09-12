@@ -1,0 +1,55 @@
+apiVersion: apps.azure.com/v1
+kind: ContainerApp
+metadata:
+  name: dragonball-web
+  namespace: dragonball-library
+spec:
+  environmentId: /subscriptions/{subscription-id}/resourceGroups/{resource-group}/providers/Microsoft.App/managedEnvironments/{environment-name}
+  configuration:
+    activeRevisionsMode: Single
+    ingress:
+      external: true
+      targetPort: 3000
+      allowInsecure: false
+      traffic:
+      - weight: 100
+        latestRevision: true
+    dapr:
+      enabled: true
+      appId: webfrontend
+      appProtocol: http
+      appPort: 3000
+      enableApiLogging: true
+  template:
+    containers:
+    - name: dragonball-web
+      image: dragonballregistry.azurecr.io/dragonball-web:latest
+      resources:
+        cpu: 0.25
+        memory: 0.5Gi
+      env:
+      - name: REACT_APP_API_URL
+        value: "https://dragonball-api.{environment-domain}"
+      - name: NODE_ENV
+        value: "production"
+      probes:
+      - type: Liveness
+        httpGet:
+          path: /
+          port: 3000
+        initialDelaySeconds: 30
+        periodSeconds: 10
+      - type: Readiness
+        httpGet:
+          path: /
+          port: 3000
+        initialDelaySeconds: 5
+        periodSeconds: 5
+    scale:
+      minReplicas: 1
+      maxReplicas: 5
+      rules:
+      - name: http-rule
+        http:
+          metadata:
+            concurrentRequests: "50"
