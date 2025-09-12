@@ -1,0 +1,19 @@
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: azure-keyvault
+  namespace: dragonball-library
+spec:
+  type: secretstores.azure.keyvault
+  version: v1
+  metadata:
+  - name: vaultName
+    value: "dragonball-keyvault"
+  - name: azureClientId
+    value: "your-client-id"
+  - name: azureClientSecret
+    value: "your-client-secret"
+  - name: azureTenantId
+    value: "your-tenant-id"
+scopes:
+- apiservice

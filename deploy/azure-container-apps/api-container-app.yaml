@@ -1,0 +1,64 @@
+apiVersion: apps.azure.com/v1
+kind: ContainerApp
+metadata:
+  name: dragonball-api
+  namespace: dragonball-library
+spec:
+  environmentId: /subscriptions/{subscription-id}/resourceGroups/{resource-group}/providers/Microsoft.App/managedEnvironments/{environment-name}
+  configuration:
+    activeRevisionsMode: Single
+    ingress:
+      external: true
+      targetPort: 8080
+      allowInsecure: false
+      traffic:
+      - weight: 100
+        latestRevision: true
+    dapr:
+      enabled: true
+      appId: apiservice
+      appProtocol: http
+      appPort: 8080
+      enableApiLogging: true
+    secrets:
+    - name: azure-sql-connection
+      value: "Server=tcp:dragonball-sql.database.windows.net,1433;Database=DragonBallDB;User ID=dbadmin;Password={password};Encrypt=true;"
+    - name: azure-storage-key
+      value: "{storage-account-key}"
+  template:
+    containers:
+    - name: dragonball-api
+      image: dragonballregistry.azurecr.io/dragonball-api:latest
+      resources:
+        cpu: 0.5
+        memory: 1Gi
+      env:
+      - name: ASPNETCORE_ENVIRONMENT
+        value: "Production"
+      - name: ConnectionStrings__DefaultConnection
+        secretRef: azure-sql-connection
+      - name: AzureStorage__ConnectionString
+        secretRef: azure-storage-key
+      - name: DAPR_HTTP_PORT
+        value: "3500"
+      probes:
+      - type: Liveness
+        httpGet:
+          path: /health
+          port: 8080
+        initialDelaySeconds: 30
+        periodSeconds: 10
+      - type: Readiness
+        httpGet:
+          path: /health
+          port: 8080
+        initialDelaySeconds: 5
+        periodSeconds: 5
+    scale:
+      minReplicas: 1
+      maxReplicas: 10
+      rules:
+      - name: http-rule
+        http:
+          metadata:
+            concurrentRequests: "30"

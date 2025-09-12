@@ -1,0 +1,28 @@
+apiVersion: app.k8s.io/v1beta1
+kind: Application
+metadata:
+  name: dragonball-library-environment
+  namespace: dragonball-library
+spec:
+  componentKinds:
+  - group: apps.azure.com
+    kind: ContainerApp
+  descriptor:
+    type: "azure-container-apps-environment"
+    version: "1.0.0"
+    description: "Dragon Ball Library Azure Container Apps Environment with Dapr"
+    maintainers:
+    - name: "Dragon Ball Team"
+      email: "team@dragonball-library.com"
+    keywords:
+    - "aspire"
+    - "dapr"
+    - "azure-container-apps"
+    - "dragon-ball"
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dragonball-library
+  labels:
+    name: dragonball-library

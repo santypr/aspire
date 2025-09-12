@@ -1,12 +1,49 @@
+using DragonBallLibrary.ApiService.Data;
+using DragonBallLibrary.ApiService.Services;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add service defaults & Aspire client integrations.
 builder.AddServiceDefaults();
 
+// Add Azure App Configuration
+// In production, this would connect to actual Azure App Configuration
+// builder.Configuration.AddAzureAppConfiguration(options =>
+// {
+//     options.Connect(connectionString)
+//            .UseFeatureFlags();
+// });
+
+// Add Azure Key Vault
+// In production, this would connect to actual Azure Key Vault
+// builder.Configuration.AddAzureKeyVault(keyVaultUri, new DefaultAzureCredential());
+
+// Add Entity Framework with SQL Server (using InMemory for demonstration)
+builder.Services.AddDbContext<DragonBallContext>(options =>
+{
+    // In production, use SQL Server:
+    // options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+    
+    // For demonstration, using InMemory database
+    options.UseInMemoryDatabase("DragonBallDb");
+});
+
 // Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new() { 
+        Title = "Dragon Ball Character Library API", 
+        Version = "v1",
+        Description = "API for managing Dragon Ball characters with Azure services integration"
+    });
+});
+
+// Register Azure services
+builder.Services.AddScoped<IBlobStorageService, BlobStorageService>();
+builder.Services.AddScoped<IConfigurationService, ConfigurationService>();
 
 // Add CORS for React frontend
 builder.Services.AddCors(options =>
@@ -22,11 +59,22 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+// Initialize database
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<DragonBallContext>();
+    context.Database.EnsureCreated();
+}
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Dragon Ball Character Library API v1");
+        c.RoutePrefix = "swagger";
+    });
 }
 
 app.UseHttpsRedirection();
@@ -34,48 +82,63 @@ app.UseCors("AllowReact");
 
 app.UseAuthorization();
 
-// Dragon Ball Characters endpoints
-var characters = new List<DragonBallCharacter>
+// Dragon Ball Characters endpoints using Entity Framework
+app.MapGet("/api/characters", async (DragonBallContext context) =>
 {
-    new(1, "Goku", "Saiyan", "Earth", "Ultra Instinct", "Kamehameha"),
-    new(2, "Vegeta", "Saiyan", "Vegeta", "Super Saiyan Blue Evolution", "Final Flash"),
-    new(3, "Piccolo", "Namekian", "Namek", "Orange Piccolo", "Special Beam Cannon"),
-    new(4, "Gohan", "Half-Saiyan", "Earth", "Beast", "Masenko"),
-    new(5, "Frieza", "Frost Demon", "Unknown", "Black Frieza", "Death Ball")
-};
+    var characters = await context.Characters.ToListAsync();
+    return Results.Ok(characters);
+})
+.WithName("GetCharacters")
+.WithTags("Characters");
 
-app.MapGet("/api/characters", () => Results.Ok(characters))
-    .WithName("GetCharacters");
-
-app.MapGet("/api/characters/{id:int}", (int id) =>
+app.MapGet("/api/characters/{id:int}", async (int id, DragonBallContext context) =>
 {
-    var character = characters.FirstOrDefault(c => c.Id == id);
+    var character = await context.Characters.FindAsync(id);
     return character is not null ? Results.Ok(character) : Results.NotFound();
 })
-.WithName("GetCharacter");
+.WithName("GetCharacter")
+.WithTags("Characters");
 
-app.MapPost("/api/characters", (CreateCharacterRequest request) =>
+app.MapPost("/api/characters", async (CreateCharacterRequest request, DragonBallContext context, IBlobStorageService blobService) =>
 {
-    var newId = characters.Max(c => c.Id) + 1;
     var character = new DragonBallCharacter(
-        newId,
+        0, // EF will generate ID
         request.Name,
         request.Race,
         request.Planet,
         request.Transformation,
         request.Technique
     );
-    characters.Add(character);
-    return Results.Created($"/api/characters/{newId}", character);
+    
+    context.Characters.Add(character);
+    await context.SaveChangesAsync();
+    
+    // Simulate setting up blob storage for character image
+    _ = Task.Run(async () =>
+    {
+        try
+        {
+            await blobService.GetCharacterImageUrlAsync(character.Name);
+        }
+        catch (Exception ex)
+        {
+            // Log error but don't fail the creation
+            app.Logger.LogWarning(ex, "Failed to setup blob storage for character {CharacterName}", character.Name);
+        }
+    });
+    
+    return Results.Created($"/api/characters/{character.Id}", character);
 })
-.WithName("CreateCharacter");
+.WithName("CreateCharacter")
+.WithTags("Characters");
 
-app.MapPut("/api/characters/{id:int}", (int id, UpdateCharacterRequest request) =>
+app.MapPut("/api/characters/{id:int}", async (int id, UpdateCharacterRequest request, DragonBallContext context) =>
 {
-    var character = characters.FirstOrDefault(c => c.Id == id);
+    var character = await context.Characters.FindAsync(id);
     if (character is null)
         return Results.NotFound();
 
+    // Update properties (using reflection or manual assignment)
     var updatedCharacter = character with
     {
         Name = request.Name,
@@ -85,23 +148,83 @@ app.MapPut("/api/characters/{id:int}", (int id, UpdateCharacterRequest request) 
         Technique = request.Technique
     };
 
-    var index = characters.IndexOf(character);
-    characters[index] = updatedCharacter;
+    context.Entry(character).CurrentValues.SetValues(updatedCharacter);
+    await context.SaveChangesAsync();
     
     return Results.Ok(updatedCharacter);
 })
-.WithName("UpdateCharacter");
+.WithName("UpdateCharacter")
+.WithTags("Characters");
 
-app.MapDelete("/api/characters/{id:int}", (int id) =>
+app.MapDelete("/api/characters/{id:int}", async (int id, DragonBallContext context, IBlobStorageService blobService) =>
 {
-    var character = characters.FirstOrDefault(c => c.Id == id);
+    var character = await context.Characters.FindAsync(id);
     if (character is null)
         return Results.NotFound();
 
-    characters.Remove(character);
+    context.Characters.Remove(character);
+    await context.SaveChangesAsync();
+    
+    // Clean up associated blob storage
+    _ = Task.Run(async () =>
+    {
+        try
+        {
+            await blobService.DeleteCharacterImageAsync(character.Name);
+        }
+        catch (Exception ex)
+        {
+            app.Logger.LogWarning(ex, "Failed to cleanup blob storage for character {CharacterName}", character.Name);
+        }
+    });
+    
     return Results.NoContent();
 })
-.WithName("DeleteCharacter");
+.WithName("DeleteCharacter")
+.WithTags("Characters");
+
+// Configuration endpoints using Azure App Configuration
+app.MapGet("/api/config/{key}", async (string key, IConfigurationService configService) =>
+{
+    try
+    {
+        var value = await configService.GetSettingAsync(key);
+        return Results.Ok(new { Key = key, Value = value });
+    }
+    catch (Exception ex)
+    {
+        return Results.Problem($"Error retrieving configuration: {ex.Message}");
+    }
+})
+.WithName("GetConfiguration")
+.WithTags("Configuration");
+
+// Health check endpoint
+app.MapGet("/health", async (DragonBallContext context) =>
+{
+    try
+    {
+        // Check database connectivity
+        await context.Database.CanConnectAsync();
+        
+        return Results.Ok(new { 
+            Status = "Healthy", 
+            Timestamp = DateTime.UtcNow,
+            Services = new { 
+                Database = "Connected", 
+                AzureAppConfiguration = "Simulated",
+                AzureKeyVault = "Simulated",
+                AzureBlobStorage = "Simulated"
+            }
+        });
+    }
+    catch (Exception ex)
+    {
+        return Results.Problem($"Health check failed: {ex.Message}");
+    }
+})
+.WithName("HealthCheck")
+.WithTags("Health");
 
 app.MapDefaultEndpoints();
 

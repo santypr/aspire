@@ -1,0 +1,19 @@
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: azure-sql
+  namespace: dragonball-library
+spec:
+  type: state.azure.sql
+  version: v1
+  metadata:
+  - name: connectionString
+    secretKeyRef:
+      name: azure-keyvault
+      key: sql-connection-string
+  - name: tableName
+    value: "DragonBallCharacters"
+  - name: keyType
+    value: "string"
+scopes:
+- apiservice

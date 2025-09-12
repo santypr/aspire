@@ -1,0 +1,19 @@
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: azure-appconfig
+  namespace: dragonball-library
+spec:
+  type: configuration.azure.appconfig
+  version: v1
+  metadata:
+  - name: connectionString
+    value: "Endpoint=https://dragonball-config.azconfig.io;Id=XXXXX;Secret=XXXXX"
+  - name: subscribeToKeyChanges
+    value: "true"
+  - name: keyPrefixes
+    value: "DragonBall:"
+  - name: labelFilter
+    value: "production"
+scopes:
+- apiservice
