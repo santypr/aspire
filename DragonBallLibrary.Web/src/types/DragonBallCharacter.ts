@@ -5,6 +5,7 @@ export interface DragonBallCharacter {
   planet: string;
   transformation: string;
   technique: string;
+  imageUrl?: string;
 }
 
 export interface CreateCharacterRequest {
@@ -13,6 +14,7 @@ export interface CreateCharacterRequest {
   planet: string;
   transformation: string;
   technique: string;
+  imageUrl?: string;
 }
 
 export interface UpdateCharacterRequest {
@@ -21,4 +23,5 @@ export interface UpdateCharacterRequest {
   planet: string;
   transformation: string;
   technique: string;
+  imageUrl?: string;
 }

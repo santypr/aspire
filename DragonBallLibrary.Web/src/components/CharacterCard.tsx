@@ -9,8 +9,23 @@ interface CharacterCardProps {
 }
 
 const CharacterCard: React.FC<CharacterCardProps> = ({ character, onEdit, onDelete }) => {
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    // If the image fails to load, hide it
+    e.currentTarget.style.display = 'none';
+  };
+
   return (
     <div className="character-card">
+      {character.imageUrl && (
+        <div className="character-image">
+          <img 
+            src={character.imageUrl} 
+            alt={character.name}
+            onError={handleImageError}
+          />
+        </div>
+      )}
+      
       <div className="character-header">
         <h3 className="character-name">{character.name}</h3>
         <span className="character-race">{character.race}</span>

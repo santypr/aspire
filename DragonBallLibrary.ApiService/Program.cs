@@ -7,6 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add service defaults & Aspire client integrations.
 builder.AddServiceDefaults();
 
+
 // Add Azure App Configuration
 // In production, this would connect to actual Azure App Configuration
 // builder.Configuration.AddAzureAppConfiguration(options =>
@@ -30,7 +31,7 @@ builder.Services.AddDbContext<DragonBallContext>(options =>
 });
 
 // Add services to the container.
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddDapr();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -101,42 +102,35 @@ app.MapGet("/api/characters/{id:int}", async (int id, DragonBallContext context)
 
 app.MapPost("/api/characters", async (CreateCharacterRequest request, DragonBallContext context, IBlobStorageService blobService) =>
 {
+    // Get the image URL from blob storage
+    var imageUrl = await blobService.GetCharacterImageUrlAsync(request.Name);
+    
     var character = new DragonBallCharacter(
         0, // EF will generate ID
         request.Name,
         request.Race,
         request.Planet,
         request.Transformation,
-        request.Technique
+        request.Technique,
+        imageUrl
     );
     
     context.Characters.Add(character);
     await context.SaveChangesAsync();
-    
-    // Simulate setting up blob storage for character image
-    _ = Task.Run(async () =>
-    {
-        try
-        {
-            await blobService.GetCharacterImageUrlAsync(character.Name);
-        }
-        catch (Exception ex)
-        {
-            // Log error but don't fail the creation
-            app.Logger.LogWarning(ex, "Failed to setup blob storage for character {CharacterName}", character.Name);
-        }
-    });
     
     return Results.Created($"/api/characters/{character.Id}", character);
 })
 .WithName("CreateCharacter")
 .WithTags("Characters");
 
-app.MapPut("/api/characters/{id:int}", async (int id, UpdateCharacterRequest request, DragonBallContext context) =>
+app.MapPut("/api/characters/{id:int}", async (int id, UpdateCharacterRequest request, DragonBallContext context, IBlobStorageService blobService) =>
 {
     var character = await context.Characters.FindAsync(id);
     if (character is null)
         return Results.NotFound();
+
+    // Get the image URL from blob storage if not provided
+    var imageUrl = request.ImageUrl ?? await blobService.GetCharacterImageUrlAsync(request.Name);
 
     // Update properties (using reflection or manual assignment)
     var updatedCharacter = character with
@@ -145,7 +139,8 @@ app.MapPut("/api/characters/{id:int}", async (int id, UpdateCharacterRequest req
         Race = request.Race,
         Planet = request.Planet,
         Transformation = request.Transformation,
-        Technique = request.Technique
+        Technique = request.Technique,
+        ImageUrl = imageUrl
     };
 
     context.Entry(character).CurrentValues.SetValues(updatedCharacter);
@@ -236,7 +231,8 @@ public record DragonBallCharacter(
     string Race,
     string Planet,
     string Transformation,
-    string Technique
+    string Technique,
+    string? ImageUrl = null
 );
 
 public record CreateCharacterRequest(
@@ -244,7 +240,8 @@ public record CreateCharacterRequest(
     string Race,
     string Planet,
     string Transformation,
-    string Technique
+    string Technique,
+    string? ImageUrl = null
 );
 
 public record UpdateCharacterRequest(
@@ -252,5 +249,6 @@ public record UpdateCharacterRequest(
     string Race,
     string Planet,
     string Transformation,
-    string Technique
+    string Technique,
+    string? ImageUrl = null
 );
