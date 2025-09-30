@@ -25,7 +25,7 @@ builder.Services.AddDbContext<DragonBallContext>(options =>
 {
     // In production, use SQL Server:
     // options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
-    
+
     // For demonstration, using InMemory database
     options.UseInMemoryDatabase("DragonBallDb");
 });
@@ -51,10 +51,13 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReact", policy =>
     {
-        policy.WithOrigins("http://localhost:3000", "https://localhost:3001")
+        policy.AllowAnyOrigin()
               .AllowAnyHeader()
-              .AllowAnyMethod()
-              .AllowCredentials();
+              .AllowAnyMethod();
+        //policy.WithOrigins("http://localhost:3000", "https://localhost:3001")
+        //      .AllowAnyHeader()
+        //      .AllowAnyMethod()
+        //      .AllowCredentials();
     });
 });
 
@@ -78,8 +81,10 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.UseHttpsRedirection();
+// CORS debe estar ANTES de UseHttpsRedirection
 app.UseCors("AllowReact");
+
+app.UseHttpsRedirection();
 
 app.UseAuthorization();
 

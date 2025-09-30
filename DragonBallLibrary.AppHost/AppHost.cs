@@ -1,3 +1,5 @@
+using Aspire.Hosting;
+
 var builder = DistributedApplication.CreateBuilder(args);
 
 // Add Azure services (for production deployment)
@@ -5,13 +7,25 @@ var builder = DistributedApplication.CreateBuilder(args);
 // For local development, we'll use simpler alternatives
 
 // Add SQL Server (using container for local development)
-var sql = builder.AddSqlServer("sql")
-    .WithLifetime(ContainerLifetime.Persistent)
-    .AddDatabase("dragonballdb");
+var sqlServerName = builder.AddParameter("sql-server-name");
+var rgName = builder.AddParameter("resource-group-name");
+var sql = builder.AddAzureSqlServer("sql-dragonball")
+    .AsExisting(sqlServerName, rgName);
+
+//var sql = builder.AddSqlServer("sql")
+//    .WithLifetime(ContainerLifetime.Persistent)
+//    .AddDatabase("dragonballdb");
 
 // Add Azure Storage emulator
 var storage = builder.AddAzureStorage("storage")
-    .RunAsEmulator();
+    .RunAsEmulator(
+        azurite =>
+        {
+            azurite.WithBlobPort(27000)
+                    .WithQueuePort(27001)
+                    .WithTablePort(27002);
+            azurite.WithLifetime(ContainerLifetime.Persistent);
+        });
 
 var blobStorage = storage.AddBlobs("character-images");
 
