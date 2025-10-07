@@ -1,18 +1,21 @@
 apiVersion: dapr.io/v1alpha1
 kind: Component
 metadata:
-  name: azure-keyvault
+  name: statestore
   namespace: dragonball-library
 spec:
-  type: secretstores.azure.keyvault
-  version: v1
+  type: state.azure.blobstorage
+  version: v2
   metadata:
-  - name: vaultName
-    value: "keyvault-5gvqxy7gckwwa"
+  - name: accountName
+    value: "storage5gvqxy7gckwwa"
+  - name: containerName
+    value: "state"
   - name: azureClientId
     value: "0fcc9fec-b164-449b-bf23-20e58abec813" 
   - name: azureTenantId
     value: "92cf6300-1c93-4b01-9a58-9603b66b404d" 
+  auth:
+    secretStore: azure-keyvault
 scopes:
 - apiservice
-- backgroundservice

@@ -7,13 +7,16 @@ spec:
   type: configuration.azure.appconfig
   version: v1
   metadata:
-  - name: connectionString
-    value: "Endpoint=https://dragonball-config.azconfig.io;Id=XXXXX;Secret=XXXXX"
+  - name: host 
+    value: "https://appconfiguration-5gvqxy7gckwwa.azconfig.io"
   - name: subscribeToKeyChanges
     value: "true"
-  - name: keyPrefixes
-    value: "DragonBall:"
-  - name: labelFilter
-    value: "production"
+  - name: azureClientId
+    value: "0fcc9fec-b164-449b-bf23-20e58abec813" 
+  - name: azureTenantId
+    value: "92cf6300-1c93-4b01-9a58-9603b66b404d" 
+  auth:
+    secretStore: azure-keyvault
 scopes:
 - apiservice
+- backgroundservice

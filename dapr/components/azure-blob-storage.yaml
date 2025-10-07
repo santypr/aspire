@@ -7,13 +7,16 @@ spec:
   type: bindings.azure.blobstorage
   version: v1
   metadata:
-  - name: storageAccount
-    value: "dragonballstorage"
-  - name: storageAccessKey
-    secretKeyRef:
-      name: azure-keyvault
-      key: storage-access-key
+  - name: accountName
+    value: "storage5gvqxy7gckwwa"
   - name: container
     value: "characters"
+  - name: azureClientId
+    value: "0fcc9fec-b164-449b-bf23-20e58abec813" 
+  - name: azureTenantId
+    value: "92cf6300-1c93-4b01-9a58-9603b66b404d" 
+  auth:
+    secretStore: azure-keyvault    
 scopes:
 - apiservice
+- backgroundservice

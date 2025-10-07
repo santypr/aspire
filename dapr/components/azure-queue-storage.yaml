@@ -1,18 +1,22 @@
 apiVersion: dapr.io/v1alpha1
 kind: Component
 metadata:
-  name: azure-keyvault
+  name: azure-queue-storage
   namespace: dragonball-library
 spec:
-  type: secretstores.azure.keyvault
+  type: bindings.azure.storagequeues
   version: v1
   metadata:
-  - name: vaultName
-    value: "keyvault-5gvqxy7gckwwa"
+  - name: accountName
+    value: "storage5gvqxy7gckwwa"
+  - name: queueName
+    value: "queue"
   - name: azureClientId
     value: "0fcc9fec-b164-449b-bf23-20e58abec813" 
   - name: azureTenantId
     value: "92cf6300-1c93-4b01-9a58-9603b66b404d" 
+  auth:
+    secretStore: azure-keyvault
 scopes:
 - apiservice
 - backgroundservice

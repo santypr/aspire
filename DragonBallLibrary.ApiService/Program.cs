@@ -1,5 +1,8 @@
+using Dapr.Client;
+using Dapr.Extensions.Configuration;
 using DragonBallLibrary.ApiService.Data;
-using DragonBallLibrary.ApiService.Services;
+using DragonBallLibrary.ServiceDefaults.Services;
+using DragonBallLibrary.ServiceDefaults.Constants;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -32,6 +35,7 @@ builder.Services.AddDbContext<DragonBallContext>(options =>
 
 // Add services to the container.
 builder.Services.AddControllers().AddDapr();
+// 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -45,6 +49,7 @@ builder.Services.AddSwaggerGen(c =>
 // Register Azure services
 builder.Services.AddScoped<IBlobStorageService, BlobStorageService>();
 builder.Services.AddScoped<IConfigurationService, ConfigurationService>();
+builder.Services.AddScoped<IOutputBindingService, OutputBindingService>();
 
 // Add CORS for React frontend
 builder.Services.AddCors(options =>
@@ -60,6 +65,11 @@ builder.Services.AddCors(options =>
         //      .AllowCredentials();
     });
 });
+
+// Create Dapr client
+var client = new DaprClientBuilder().Build();
+builder.Configuration.AddDaprSecretStore(ComponentNames.SecretComponentName, client, TimeSpan.FromSeconds(20));
+builder.Configuration.AddDaprConfigurationStore(ComponentNames.ConfigComponentName, new List<string>(), client, TimeSpan.FromSeconds(20));
 
 var app = builder.Build();
 
