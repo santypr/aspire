@@ -1,10 +1,3 @@
-using Dapr.Client;
-using Dapr.Extensions.Configuration;
-using DragonBallLibrary.ApiService.Data;
-using DragonBallLibrary.ServiceDefaults.Services;
-using DragonBallLibrary.ServiceDefaults.Constants;
-using Microsoft.EntityFrameworkCore;
-
 var builder = WebApplication.CreateBuilder(args);
 
 // Add service defaults & Aspire client integrations.

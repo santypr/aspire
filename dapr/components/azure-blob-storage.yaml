@@ -12,11 +12,11 @@ spec:
   - name: container
     value: "characters"
   - name: azureClientId
-    value: "0fcc9fec-b164-449b-bf23-20e58abec813" 
+    value: "53bf167e-f07b-4ee0-9c1f-96e9088bc6f0" 
   - name: azureTenantId
-    value: "92cf6300-1c93-4b01-9a58-9603b66b404d" 
+    value: "92cf6300-1c93-4b01-9a58-9603b66b404d"  
   auth:
-    secretStore: azure-keyvault    
+    secretStore: azure-keyvault
 scopes:
 - apiservice
 - backgroundservice

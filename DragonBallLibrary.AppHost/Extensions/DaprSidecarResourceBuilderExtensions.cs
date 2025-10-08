@@ -1,7 +1,4 @@
-﻿using System.Collections.Immutable;
-using CommunityToolkit.Aspire.Hosting.Dapr;
-
-namespace DragonBallLibrary.AppHost.Extensions;
+﻿namespace DragonBallLibrary.AppHost.Extensions;
 public static class DaprSidecarResourceBuilderExtensions
 {
   private const string ConnectionStringEnvironmentName = "ConnectionStrings__";

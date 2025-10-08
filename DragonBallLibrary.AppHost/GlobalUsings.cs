@@ -1,8 +1,4 @@
 ﻿global using Aspire.Hosting;
-global using Aspire.Hosting.Azure; 
-global using Azure.Provisioning;
-global using Azure.Provisioning.Storage;
-global using Azure.Provisioning.AppConfiguration;
-global using Azure.Provisioning.KeyVault;
-
-
+global using DragonBallLibrary.AppHost.Extensions;
+global using System.Collections.Immutable;
+global using CommunityToolkit.Aspire.Hosting.Dapr;

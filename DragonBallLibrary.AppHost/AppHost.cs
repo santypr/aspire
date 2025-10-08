@@ -1,6 +1,3 @@
-using Aspire.Hosting;
-using DragonBallLibrary.AppHost.Extensions;
-
 var builder = DistributedApplication.CreateBuilder(args);
 
 // Add Azure services (for production deployment)
@@ -11,7 +8,7 @@ var builder = DistributedApplication.CreateBuilder(args);
 var sqlServerName = builder.AddParameter("sql-server-name");
 var rgName = builder.AddParameter("resource-group-name");
 var sql = builder.AddAzureSqlServer("sql-dragonball")
-                        .AsExisting(sqlServerName, rgName);
+    .AsExisting(sqlServerName, rgName);
 
 
 //var sql = builder.AddSqlServer("sql")
