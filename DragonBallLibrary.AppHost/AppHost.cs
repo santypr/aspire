@@ -1,3 +1,5 @@
+using Aspire.Hosting;
+
 var builder = DistributedApplication.CreateBuilder(args);
 
 // Add Azure services (for production deployment)
@@ -60,5 +62,13 @@ var backgroundService = builder.AddProject<Projects.DragonBallLibrary_Background
     .WithEnvironment("AZURE_TENANT_ID", () => "development-tenant-id");
 // For the React frontend, we'll reference it by URL since it's a separate Node.js app
 // In production, this would be containerized and added as a container resource
+
+var reactApp = builder.AddNpmApp("react", "../DragonBallLibrary.Web")
+    .WithReference(apiService)
+    .WaitFor(apiService)
+    .WithEnvironment("REACT_APP_API_URL", apiService.GetEndpoint("http")) 
+    .WithExternalHttpEndpoints()
+    .PublishAsDockerFile();
+
 
 await builder.Build().RunAsync();

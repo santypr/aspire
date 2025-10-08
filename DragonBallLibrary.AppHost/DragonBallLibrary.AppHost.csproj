@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <Sdk Name="Aspire.AppHost.Sdk" Version="9.4.2" />
 
@@ -29,6 +29,7 @@
     <PackageReference Include="Azure.Provisioning.Resources" Version="0.2.0" />
     <PackageReference Include="Azure.Provisioning.Storage" Version="1.1.2" />
     <PackageReference Include="CommunityToolkit.Aspire.Hosting.Dapr" />
+    <PackageReference Include="CommunityToolkit.Aspire.Hosting.NodeJS.Extensions" Version="9.8.0" />
   </ItemGroup>
 
 </Project>
