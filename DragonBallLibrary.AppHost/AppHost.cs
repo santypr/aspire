@@ -12,9 +12,7 @@ var sqlServerName = builder.AddParameter("sql-server-name");
 var rgName = builder.AddParameter("resource-group-name");
 var sql = builder.AddAzureSqlServer("sql-dragonball")
                         .AsExisting(sqlServerName, rgName);
-var storageName = builder.AddParameter("storage-name");
-var keyVaultName = builder.AddParameter("key-vault-name");
-var appConfigurationName = builder.AddParameter("app-configuration-name");
+
 
 //var sql = builder.AddSqlServer("sql")
 //    .WithLifetime(ContainerLifetime.Persistent)
@@ -30,21 +28,7 @@ var storage = builder.AddAzureStorage("storage")
                     .WithQueuePort(27001)
                     .WithTablePort(27002);
             azurite.WithLifetime(ContainerLifetime.Persistent);
-        })
-    .ConfigureInfrastructure((infrastructure) =>
-    {
-        var storageAccount = infrastructure.GetProvisionableResources().OfType<StorageAccount>().FirstOrDefault(r => r.BicepIdentifier == "storage")
-                             ?? throw new InvalidOperationException($"Could not find configured storage account with name 'storage'");
-
-        // Storage Account Contributor and Storage Blob Data Owner roles are required by the Azure Functions host
-        var principalTypeParameter = new ProvisioningParameter(AzureBicepResource.KnownParameters.PrincipalType, typeof(string));
-        var principalIdParameter = new ProvisioningParameter(AzureBicepResource.KnownParameters.PrincipalId, typeof(string));
-        infrastructure.Add(storageAccount.CreateRoleAssignment(StorageBuiltInRole.StorageAccountContributor, principalTypeParameter, principalIdParameter));
-        infrastructure.Add(storageAccount.CreateRoleAssignment(StorageBuiltInRole.StorageBlobDataOwner, principalTypeParameter, principalIdParameter));
-
-        // Ensure that public access to blobs is disabled
-        storageAccount.AllowBlobPublicAccess = true;
-    });
+        });
 
 var blobStorage = storage.AddBlobs("character-images");
 var queueStorage = storage.AddQueue("queue");             

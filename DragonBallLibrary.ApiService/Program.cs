@@ -91,10 +91,7 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-// CORS debe estar ANTES de UseHttpsRedirection
 app.UseCors("AllowReact");
-
-app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
@@ -115,7 +112,8 @@ app.MapGet("/api/characters/{id:int}", async (int id, DragonBallContext context)
 .WithName("GetCharacter")
 .WithTags("Characters");
 
-app.MapPost("/api/characters", async (CreateCharacterRequest request, DragonBallContext context, IBlobStorageService blobService) =>
+app.MapPost("/api/characters", async (CreateCharacterRequest request, DragonBallContext context, 
+                                            IBlobStorageService blobService, IOutputBindingService bindingService) =>
 {
     // Get the image URL from blob storage
     var imageUrl = await blobService.GetCharacterImageUrlAsync(request.Name);
@@ -132,13 +130,17 @@ app.MapPost("/api/characters", async (CreateCharacterRequest request, DragonBall
     
     context.Characters.Add(character);
     await context.SaveChangesAsync();
-    
+
+    var message = new MessageModel("New character created.");
+    await bindingService.PublishMessageAsync<MessageModel>(message, ComponentNames.QueueComponentName, CancellationToken.None);
+
     return Results.Created($"/api/characters/{character.Id}", character);
 })
 .WithName("CreateCharacter")
 .WithTags("Characters");
 
-app.MapPut("/api/characters/{id:int}", async (int id, UpdateCharacterRequest request, DragonBallContext context, IBlobStorageService blobService) =>
+app.MapPut("/api/characters/{id:int}", async (int id, UpdateCharacterRequest request, DragonBallContext context,
+                                                    IBlobStorageService blobService, IOutputBindingService bindingService) =>
 {
     var character = await context.Characters.FindAsync(id);
     if (character is null)
@@ -160,13 +162,17 @@ app.MapPut("/api/characters/{id:int}", async (int id, UpdateCharacterRequest req
 
     context.Entry(character).CurrentValues.SetValues(updatedCharacter);
     await context.SaveChangesAsync();
-    
+
+    var message = new MessageModel($"Character {id} updated.");
+    await bindingService.PublishMessageAsync<MessageModel>(message, ComponentNames.QueueComponentName, CancellationToken.None);
+
     return Results.Ok(updatedCharacter);
 })
 .WithName("UpdateCharacter")
 .WithTags("Characters");
 
-app.MapDelete("/api/characters/{id:int}", async (int id, DragonBallContext context, IBlobStorageService blobService) =>
+app.MapDelete("/api/characters/{id:int}", async (int id, DragonBallContext context, 
+                                                        IBlobStorageService blobService, IOutputBindingService bindingService) =>
 {
     var character = await context.Characters.FindAsync(id);
     if (character is null)
@@ -187,7 +193,10 @@ app.MapDelete("/api/characters/{id:int}", async (int id, DragonBallContext conte
             app.Logger.LogWarning(ex, "Failed to cleanup blob storage for character {CharacterName}", character.Name);
         }
     });
-    
+
+    var message = new MessageModel($"Character {id} deleted.");
+    await bindingService.PublishMessageAsync<MessageModel>(message, ComponentNames.QueueComponentName, CancellationToken.None);
+
     return Results.NoContent();
 })
 .WithName("DeleteCharacter")
@@ -238,7 +247,7 @@ app.MapGet("/health", async (DragonBallContext context) =>
 
 app.MapDefaultEndpoints();
 
-app.Run();
+await app.RunAsync();
 
 public record DragonBallCharacter(
     int Id,

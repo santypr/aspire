@@ -1,5 +1,3 @@
-using Microsoft.EntityFrameworkCore;
-
 namespace DragonBallLibrary.ApiService.Data;
 
 public class DragonBallContext : DbContext
