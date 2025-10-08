@@ -1,16 +1,18 @@
 apiVersion: dapr.io/v1alpha1
 kind: Component
 metadata:
-  name: azure-appconfig
+  name: azure-queue-storage
   namespace: dragonball-library
 spec:
-  type: configuration.azure.appconfig
+  type: bindings.azure.storagequeues
   version: v1
   metadata:
-  - name: host 
-    value: "https://appconfiguration-5gvqxy7gckwwa.azconfig.io"
-  - name: subscribeToKeyChanges
-    value: "true"
+  - name: accountName
+    value: "storage5gvqxy7gckwwa"
+  - name: queueName
+    value: "queue"
+  - name: route
+    value: /background
   - name: azureClientId
     value: "53bf167e-f07b-4ee0-9c1f-96e9088bc6f0" 
   - name: azureTenantId

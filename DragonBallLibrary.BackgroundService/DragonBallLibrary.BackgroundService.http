@@ -1,0 +1,6 @@
+@DragonBallLibrary.BackgroundService_HostAddress = http://localhost:5100
+
+GET {{DragonBallLibrary.BackgroundService_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

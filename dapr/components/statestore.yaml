@@ -1,16 +1,16 @@
 apiVersion: dapr.io/v1alpha1
 kind: Component
 metadata:
-  name: azure-appconfig
+  name: statestore
   namespace: dragonball-library
 spec:
-  type: configuration.azure.appconfig
-  version: v1
+  type: state.azure.blobstorage
+  version: v2
   metadata:
-  - name: host 
-    value: "https://appconfiguration-5gvqxy7gckwwa.azconfig.io"
-  - name: subscribeToKeyChanges
-    value: "true"
+  - name: accountName
+    value: "storage5gvqxy7gckwwa"
+  - name: containerName
+    value: "state"
   - name: azureClientId
     value: "53bf167e-f07b-4ee0-9c1f-96e9088bc6f0" 
   - name: azureTenantId
@@ -19,4 +19,3 @@ spec:
     secretStore: azure-keyvault
 scopes:
 - apiservice
-- backgroundservice
