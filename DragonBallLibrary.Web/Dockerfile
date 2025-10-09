@@ -1,29 +1,31 @@
-FROM node:20-alpine AS build
+FROM node:20 as build
 
 WORKDIR /app
 
-# Copy package files
-COPY package*.json ./
+COPY package.json package.json
+COPY package-lock.json package-lock.json
 
-# Install dependencies
-RUN npm ci --only=production
+RUN npm install
 
-# Copy source code
 COPY . .
 
-# Build the React app
 RUN npm run build
 
-FROM nginx:alpine AS production
+FROM nginx:alpine
 
-# Copy built React app to nginx
-COPY --from=build /app/build /usr/share/nginx/html
+# Install curl for health checks
+RUN apk add --no-cache curl
 
-# Copy nginx configuration
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Copy nginx configuration and static files
+COPY --from=build /app/default.conf /etc/nginx/conf.d/default.conf
+COPY --from=build /app/dist /usr/share/nginx/html
 
-# Expose port 3000 (to match our Container Apps configuration)
-EXPOSE 3000
+# Copy our custom entrypoint with integrated environment configuration
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 
-# Start nginx
-CMD ["nginx", "-g", "daemon off;"]
+# Make script executable
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+# Expose the default nginx port
+EXPOSE 80
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]

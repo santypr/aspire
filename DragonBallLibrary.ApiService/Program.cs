@@ -30,7 +30,7 @@ builder.Services.AddDbContext<DragonBallContext>(options =>
 
 // Add services to the container.
 builder.Services.AddControllers().AddDapr();
-// 
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -72,7 +72,7 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<DragonBallContext>();
-    context.Database.EnsureCreated();
+    await context.Database.EnsureCreatedAsync();
 }
 
 // Configure the HTTP request pipeline.

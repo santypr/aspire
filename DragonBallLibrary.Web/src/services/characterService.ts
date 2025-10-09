@@ -1,7 +1,33 @@
 import axios from 'axios';
 import { DragonBallCharacter, CreateCharacterRequest, UpdateCharacterRequest } from '../types/DragonBallCharacter';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5304';
+// Extend the Window interface to include __env
+declare global {
+  interface Window {
+    __env?: {
+      REACT_APP_API_URL?: string;
+      REACT_APP_ENVIRONMENT?: string;
+    };
+  }
+}
+
+// Helper function to get API URL from runtime or build-time environment variables
+const getApiUrl = (): string => {
+  // Runtime environment (from window.__env)
+  if (typeof window !== 'undefined' && window.__env && window.__env.REACT_APP_API_URL) {
+    return window.__env.REACT_APP_API_URL;
+  }
+  
+  // Build-time environment (webpack DefinePlugin)
+  if (typeof process !== 'undefined' && process.env && process.env.REACT_APP_API_URL) {
+    return process.env.REACT_APP_API_URL;
+  }
+  
+  // Default fallback
+  return 'http://localhost:5304';
+};
+
+const API_BASE_URL = getApiUrl();
 
 const api = axios.create({
   baseURL: API_BASE_URL,

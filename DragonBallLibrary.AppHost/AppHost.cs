@@ -1,4 +1,6 @@
 using Aspire.Hosting;
+using Aspire.Hosting.Azure;
+using Google.Protobuf.WellKnownTypes;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
@@ -50,7 +52,8 @@ var apiService = builder.AddProject<Projects.DragonBallLibrary_ApiService>("apis
     .WithHttpHealthCheck("/health")
     .WithEnvironment("AZURE_CLIENT_ID", () => "development-client-id")
     .WithEnvironment("AZURE_CLIENT_SECRET", () => "development-client-secret")
-    .WithEnvironment("AZURE_TENANT_ID", () => "development-tenant-id");
+    .WithEnvironment("AZURE_TENANT_ID", () => "development-tenant-id")
+    .WithExternalHttpEndpoints();
 
 var backgroundService = builder.AddProject<Projects.DragonBallLibrary_BackgroundService>("backgroundservice")
     .WithReference(blobStorage)
@@ -60,15 +63,17 @@ var backgroundService = builder.AddProject<Projects.DragonBallLibrary_Background
     .WithEnvironment("AZURE_CLIENT_ID", () => "development-client-id")
     .WithEnvironment("AZURE_CLIENT_SECRET", () => "development-client-secret")
     .WithEnvironment("AZURE_TENANT_ID", () => "development-tenant-id");
+
 // For the React frontend, we'll reference it by URL since it's a separate Node.js app
 // In production, this would be containerized and added as a container resource
 
 var reactApp = builder.AddNpmApp("react", "../DragonBallLibrary.Web")
     .WithReference(apiService)
     .WaitFor(apiService)
-    .WithEnvironment("REACT_APP_API_URL", apiService.GetEndpoint("http")) 
+    .WithEnvironment("BROWSER", "none") // Disable opening browser on npm start
+    .WithEnvironment("REACT_APP_API_URL", apiService.GetEndpoint("http"))
+    .WithHttpEndpoint(80, 8080)
     .WithExternalHttpEndpoints()
     .PublishAsDockerFile();
-
 
 await builder.Build().RunAsync();
