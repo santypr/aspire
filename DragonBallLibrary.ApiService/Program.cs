@@ -1,32 +1,7 @@
-
-
 var builder = WebApplication.CreateBuilder(args);
 
 // Add service defaults & Aspire client integrations.
 builder.AddServiceDefaults();
-
-
-// Add Azure App Configuration
-// In production, this would connect to actual Azure App Configuration
-// builder.Configuration.AddAzureAppConfiguration(options =>
-// {
-//     options.Connect(connectionString)
-//            .UseFeatureFlags();
-// });
-
-// Add Azure Key Vault
-// In production, this would connect to actual Azure Key Vault
-// builder.Configuration.AddAzureKeyVault(keyVaultUri, new DefaultAzureCredential());
-
-// Add Entity Framework with SQL Server (using InMemory for demonstration)
-builder.Services.AddDbContext<DragonBallContext>(options =>
-{
-    // In production, use SQL Server:
-    // options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
-
-    // For demonstration, using InMemory database
-    options.UseInMemoryDatabase("DragonBallDb");
-});
 
 // Add services to the container.
 builder.Services.AddControllers().AddDapr();
@@ -65,6 +40,16 @@ builder.Services.AddCors(options =>
 var client = new DaprClientBuilder().Build();
 builder.Configuration.AddDaprSecretStore(ComponentNames.SecretComponentName, client, TimeSpan.FromSeconds(20));
 builder.Configuration.AddDaprConfigurationStore(ComponentNames.ConfigComponentName, new List<string>(), client, TimeSpan.FromSeconds(20));
+
+// Add Entity Framework with SQL Server (using InMemory for demonstration)
+builder.Services.AddDbContext<DragonBallContext>(options =>
+{
+    // In production, use SQL Server:
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+
+    // For demonstration, using InMemory database
+    //options.UseInMemoryDatabase("DragonBallDb");
+});
 
 var app = builder.Build();
 

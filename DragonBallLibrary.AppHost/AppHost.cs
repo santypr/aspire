@@ -1,7 +1,3 @@
-using Aspire.Hosting;
-using Aspire.Hosting.Azure;
-using Google.Protobuf.WellKnownTypes;
-
 var builder = DistributedApplication.CreateBuilder(args);
 
 // Add Azure services (for production deployment)
