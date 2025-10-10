@@ -1,35 +1,43 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <Sdk Name="Aspire.AppHost.Sdk" Version="9.4.2" />
+	<Sdk Name="Aspire.AppHost.Sdk" Version="9.4.2" />
 
-  <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFramework>net8.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <UserSecretsId>551fdeca-7db1-4f09-9122-3be5da7699ce</UserSecretsId>
-  </PropertyGroup>
+	<PropertyGroup>
+		<OutputType>Exe</OutputType>
+		<TargetFramework>net8.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<UserSecretsId>551fdeca-7db1-4f09-9122-3be5da7699ce</UserSecretsId>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\DragonBallLibrary.ApiService\DragonBallLibrary.ApiService.csproj" />
-    <ProjectReference Include="..\DragonBallLibrary.BackgroundService\DragonBallLibrary.BackgroundService.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\DragonBallLibrary.ApiService\DragonBallLibrary.ApiService.csproj" />
+		<ProjectReference Include="..\DragonBallLibrary.BackgroundService\DragonBallLibrary.BackgroundService.csproj" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Aspire.Hosting.AppHost" Version="9.4.2" />
-    <PackageReference Include="Aspire.Hosting.Azure.AppConfiguration" Version="9.5.1" />
-    <PackageReference Include="Aspire.Hosting.Azure.ApplicationInsights" Version="9.5.1" />
-    <PackageReference Include="Aspire.Hosting.Azure.KeyVault" Version="9.5.1" />
-    <PackageReference Include="Aspire.Hosting.Azure.Sql" Version="9.4.2" />
-    <PackageReference Include="Aspire.Hosting.Azure.Storage" Version="9.4.2" />
-    <PackageReference Include="Aspire.Hosting.SqlServer" Version="9.4.2" />
-    <PackageReference Include="Azure.Provisioning.AppConfiguration" Version="1.1.0" />
-    <PackageReference Include="Azure.Provisioning.ApplicationInsights" Version="1.1.0" />
-    <PackageReference Include="Azure.Provisioning.KeyVault" Version="1.1.0" />
-    <PackageReference Include="Azure.Provisioning.Resources" Version="0.2.0" />
-    <PackageReference Include="Azure.Provisioning.Storage" Version="1.1.2" />
-    <PackageReference Include="CommunityToolkit.Aspire.Hosting.Dapr" />
-    <PackageReference Include="CommunityToolkit.Aspire.Hosting.NodeJS.Extensions" Version="9.8.0" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Aspire.Hosting.AppHost" Version="9.4.2" />
+		<PackageReference Include="Aspire.Hosting.Azure.AppConfiguration" Version="9.5.1" />
+		<PackageReference Include="Aspire.Hosting.Azure.ApplicationInsights" Version="9.5.1" />
+		<PackageReference Include="Aspire.Hosting.Azure.KeyVault" Version="9.5.1" />
+		<PackageReference Include="Aspire.Hosting.Azure.Sql" Version="9.4.2" />
+		<PackageReference Include="Aspire.Hosting.Azure.Storage" Version="9.4.2" />
+		<PackageReference Include="Aspire.Hosting.SqlServer" Version="9.4.2" />
+		<PackageReference Include="Azure.Provisioning.AppConfiguration" Version="1.1.0" />
+		<PackageReference Include="Azure.Provisioning.ApplicationInsights" Version="1.1.0" />
+		<PackageReference Include="Azure.Provisioning.KeyVault" Version="1.1.0" />
+		<PackageReference Include="Azure.Provisioning.Resources" Version="0.2.0" />
+		<PackageReference Include="Azure.Provisioning.Storage" Version="1.1.2" />
+		<PackageReference Include="CommunityToolkit.Aspire.Hosting.Azure.Dapr" Version="9.8.0" />
+		<PackageReference Include="CommunityToolkit.Aspire.Hosting.NodeJS.Extensions" Version="9.8.0" />
+	</ItemGroup>
+	<Target Name="RestoreNpm" BeforeTargets="Build" Condition=" '$(DesignTimeBuild)' != 'true' ">
+		<ItemGroup>
+			<PackageJsons Include="..\*\package.json" />
+		</ItemGroup>
 
+		<!-- Install npm packages if node_modules is missing -->
+		<Message Importance="Normal" Text="Installing npm packages for %(PackageJsons.RelativeDir)" Condition="!Exists('%(PackageJsons.RootDir)%(PackageJsons.Directory)/node_modules')" />
+		<Exec Command="npm install" WorkingDirectory="%(PackageJsons.RootDir)%(PackageJsons.Directory)" Condition="!Exists('%(PackageJsons.RootDir)%(PackageJsons.Directory)/node_modules')" />
+	</Target>
 </Project>
