@@ -46,6 +46,8 @@ var apiService = builder.AddProject<Projects.DragonBallLibrary_ApiService>("apis
     .WithReference(appConfiguration)
     .WithCustomDaprSidecar("apiservice", null)
     .WithHttpHealthCheck("/health")
+    // Note: These are placeholder values for local development only
+    // In production, use actual Azure credentials from Key Vault or Managed Identity
     .WithEnvironment("AZURE_CLIENT_ID", () => "development-client-id")
     .WithEnvironment("AZURE_CLIENT_SECRET", () => "development-client-secret")
     .WithEnvironment("AZURE_TENANT_ID", () => "development-tenant-id")
@@ -56,6 +58,8 @@ var backgroundService = builder.AddProject<Projects.DragonBallLibrary_Background
     .WithReference(queueStorage)
     .WithCustomDaprSidecar("backgroundservice", null)
     .WithHttpHealthCheck("/health")
+    // Note: These are placeholder values for local development only
+    // In production, use actual Azure credentials from Key Vault or Managed Identity
     .WithEnvironment("AZURE_CLIENT_ID", () => "development-client-id")
     .WithEnvironment("AZURE_CLIENT_SECRET", () => "development-client-secret")
     .WithEnvironment("AZURE_TENANT_ID", () => "development-tenant-id");
