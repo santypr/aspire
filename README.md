@@ -310,11 +310,14 @@ The Aspire dashboard provides:
 
 **Important:** This repository contains template configuration files with placeholder values for sensitive data. Before deploying or running the application, you must replace these placeholders with your actual credentials.
 
+⚠️ **For Repository Maintainers:** If you're preparing to make this repository public and it previously contained sensitive data, you must clean the git history first. See [GIT_HISTORY_CLEANUP.md](GIT_HISTORY_CLEANUP.md) for instructions on removing sensitive data from commit history using BFG Repo-Cleaner or git-filter-repo.
+
 Please see [SECURITY.md](SECURITY.md) for detailed information on:
 - How to properly configure credentials
 - Files that require your attention
 - Best practices for secret management
 - Azure Key Vault integration
+- Git history cleanup (for maintainers)
 
 **Never commit real credentials or secrets to the repository.**
 

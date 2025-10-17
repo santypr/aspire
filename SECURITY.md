@@ -101,6 +101,10 @@ The following files contain placeholders that must be replaced with your actual 
 4. Update Dapr components to reference Key Vault
 5. Never use hardcoded credentials in production
 
+## Git History Cleanup
+
+⚠️ **Important for Repository Maintainers:** If this repository previously contained sensitive data in git history, you must clean the history before making it public. See [GIT_HISTORY_CLEANUP.md](GIT_HISTORY_CLEANUP.md) for detailed instructions on using BFG Repo-Cleaner or git-filter-repo to remove sensitive data from commit history.
+
 ## Reporting Security Issues
 
 If you discover a security vulnerability, please email the repository maintainers directly. Do not create a public GitHub issue.

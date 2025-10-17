@@ -126,11 +126,15 @@ All sensitive data has been successfully removed from the repository.
 14. `.env.production` → `.env.production.example`
 15. `.env.staging` → `.env.staging.example`
 
+## ⚠️ CRITICAL: Git History Cleanup Required
+
+**The sensitive data is still visible in git history!** Even though current files are clean, previous commits still contain the original credentials. See **[GIT_HISTORY_CLEANUP.md](GIT_HISTORY_CLEANUP.md)** for detailed instructions.
+
 ## Recommendations for Repository Owner
 
-1. **Review Git History:** Consider using tools like `git-filter-repo` or `BFG Repo-Cleaner` to remove sensitive data from git history if this repository has been shared privately before.
+1. **⚠️ IMMEDIATE: Review Git History:** The sensitive data removed in this PR is **still accessible in previous commits**. You MUST use tools like `git-filter-repo` or `BFG Repo-Cleaner` to remove sensitive data from git history before making the repository public. See [GIT_HISTORY_CLEANUP.md](GIT_HISTORY_CLEANUP.md) for complete instructions.
 
-2. **Rotate Credentials:** Since these credentials were in the repository:
+2. **🔐 URGENT: Rotate Credentials:** Since these credentials were in the repository and are still in git history:
    - Rotate the SQL database password
    - Create a new Azure Service Principal with new Client ID and Secret
    - Regenerate Azure Storage account keys
@@ -160,4 +164,8 @@ This syntax makes it easy for users to identify and replace placeholders with th
 
 ## Status
 
-✅ **COMPLETE** - The repository is now safe for public release. All sensitive data has been removed and replaced with clearly marked placeholders.
+⚠️ **CURRENT FILES CLEAN, BUT GIT HISTORY REQUIRES CLEANUP** 
+
+- ✅ Current files are safe - all sensitive data replaced with placeholders
+- ⚠️ **Git history still contains sensitive data** - requires cleanup before public release
+- See [GIT_HISTORY_CLEANUP.md](GIT_HISTORY_CLEANUP.md) for detailed cleanup instructions
