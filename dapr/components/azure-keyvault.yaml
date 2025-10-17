@@ -8,11 +8,11 @@ spec:
   version: v1
   metadata:
   - name: vaultName
-    value: "keyvault-5gvqxy7gckwwa"
+    value: "{your-keyvault-name}"
   - name: azureClientId
-    value: "53bf167e-f07b-4ee0-9c1f-96e9088bc6f0" 
+    value: "{your-azure-client-id}" 
   - name: azureTenantId
-    value: "92cf6300-1c93-4b01-9a58-9603b66b404d" 
+    value: "{your-azure-tenant-id}" 
 scopes:
 - apiservice
 - backgroundservice
