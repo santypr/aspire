@@ -108,8 +108,12 @@ This project showcases how to build a modern, cloud-native application using:
 - Node.js 18+ and npm
 - Docker Desktop
 - Visual Studio 2022 or VS Code
+- Azure CLI (for Azure deployments)
+- Azure subscription (for cloud deployment)
 
 ### Local Development
+
+> **⚠️ Important:** Before running the application, you must configure your credentials. See [SECURITY.md](SECURITY.md) for detailed instructions.
 
 1. **Clone the repository**
    ```bash
@@ -117,25 +121,36 @@ This project showcases how to build a modern, cloud-native application using:
    cd aspire
    ```
 
-2. **Restore .NET packages**
+2. **Configure environment files**
+   ```bash
+   cd DragonBallLibrary.Web
+   cp .env.development.example .env.development
+   cp .env.production.example .env.production
+   cp .env.staging.example .env.staging
+   cd ..
+   ```
+   
+   Then update `DragonBallLibrary.AppHost/appsettings.Development.json` with your Azure credentials (see [SECURITY.md](SECURITY.md)).
+
+3. **Restore .NET packages**
    ```bash
    dotnet restore
    ```
 
-3. **Install React dependencies**
+4. **Install React dependencies**
    ```bash
    cd DragonBallLibrary.Web
    npm install
    cd ..
    ```
 
-4. **Run with Aspire**
+5. **Run with Aspire**
    ```bash
    cd DragonBallLibrary.AppHost
    dotnet run
    ```
 
-5. **Access the applications**
+6. **Access the applications**
    - **Aspire Dashboard**: http://localhost:15888
    - **API**: http://localhost:5304
    - **Frontend**: http://localhost:3000
@@ -290,6 +305,21 @@ The Aspire dashboard provides:
 └── deploy/                              # Deployment configs
     └── azure-container-apps/            # Azure Container Apps YAML
 ```
+
+## 🔒 Security
+
+**Important:** This repository contains template configuration files with placeholder values for sensitive data. Before deploying or running the application, you must replace these placeholders with your actual credentials.
+
+⚠️ **For Repository Maintainers:** If you're preparing to make this repository public and it previously contained sensitive data, you must clean the git history first. See [GIT_HISTORY_CLEANUP.md](GIT_HISTORY_CLEANUP.md) for instructions on removing sensitive data from commit history using BFG Repo-Cleaner or git-filter-repo.
+
+Please see [SECURITY.md](SECURITY.md) for detailed information on:
+- How to properly configure credentials
+- Files that require your attention
+- Best practices for secret management
+- Azure Key Vault integration
+- Git history cleanup (for maintainers)
+
+**Never commit real credentials or secrets to the repository.**
 
 ## 🤝 Contributing
 

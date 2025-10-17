@@ -22,9 +22,9 @@ spec:
       enableApiLogging: true
     secrets:
     - name: azure-sql-connection
-      value: "Server=tcp:dragonball-sql.database.windows.net,1433;Database=DragonBallDB;User ID=dbadmin;Password={password};Encrypt=true;"
+      value: "Server=tcp:{your-sql-server}.database.windows.net,1433;Database={your-database};User ID={your-username};Password={your-password};Encrypt=true;"
     - name: azure-storage-key
-      value: "{storage-account-key}"
+      value: "{your-storage-account-key}"
   template:
     containers:
     - name: dragonball-api

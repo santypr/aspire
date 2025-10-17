@@ -38,14 +38,14 @@ Examples:
 Using Azure CLI:
 ```bash
 # Create container if not exists
-az storage container create --name characters --account-name dragonballstorage
+az storage container create --name characters --account-name {your-storage-account}
 
 # Upload images with proper folder structure  
 az storage blob upload \
   --file ./goku.jpg \
   --container-name characters \
   --name goku/goku.jpg \
-  --account-name dragonballstorage
+  --account-name {your-storage-account}
 ```
 
 ### 4. Using Dapr for File Management
@@ -60,7 +60,7 @@ await _daprClient.InvokeBindingAsync("azure-blob-storage", "create", new
 });
 
 // Get image URL
-var imageUrl = "https://dragonballstorage.blob.core.windows.net/characters/goku/goku.jpg";
+var imageUrl = "https://{your-storage-account}.blob.core.windows.net/characters/goku/goku.jpg";
 ```
 
 ## Configuration
@@ -76,7 +76,7 @@ spec:
   version: v1
   metadata:
   - name: storageAccount
-    value: "dragonballstorage"
+    value: "{your-storage-account}"
   - name: container
     value: "characters"
 ```
@@ -86,7 +86,7 @@ Set the storage account name in configuration:
 ```json
 {
   "Dapr": {
-    "StorageAccount": "dragonballstorage"
+    "StorageAccount": "{your-storage-account}"
   }
 }
 ```
